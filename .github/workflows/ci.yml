@@ -20,13 +20,15 @@ jobs:
 
       # Docker уже установлен на GitHub-hosted раннерах - Testcontainers
       # поднимает PostgreSQL сам, отдельный service-контейнер не нужен.
+      # Docker API 1.32 по умолчанию в Testcontainers 1.20.1 слишком стар
+      # для Docker на современных раннерах; явно используем API 1.44.
 
       - name: Собрать и прогнать проверки (checkstyle, pmd, tests, jacoco)
-        run: mvn -B verify
+        run: mvn -B -Dapi.version=1.44 verify
         continue-on-error: true
 
       - name: Mutation testing (PIT)
-        run: mvn -B org.pitest:pitest-maven:mutationCoverage
+        run: mvn -B -Dapi.version=1.44 org.pitest:pitest-maven:mutationCoverage
         continue-on-error: true
 
       - name: Сформировать score.json

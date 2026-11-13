@@ -39,7 +39,8 @@
 Для проверки только ЛР1 без намеренно красных гейтов следующих работ:
 
 ```bash
-mvn -B -Dtest=OrderServiceTest,OrderApiReferenceTest,PricingCalculatorReferenceTest \
+mvn -B -Dapi.version=1.44 \
+  -Dtest=OrderServiceTest,OrderApiReferenceTest,PricingCalculatorReferenceTest \
   -Dmaven.test.failure.ignore=false verify
 ```
 
@@ -51,8 +52,12 @@ mvn -B -Dtest=OrderServiceTest,OrderApiReferenceTest,PricingCalculatorReferenceT
 Checkstyle — **0 замечаний**, PMD — **8 замечаний** по фактическому XML-отчёту
 (в неизменённых классах приложения). Сумма **8 ≤ 15** соответствует порогу ЛР1.
 
-Полный учебный пайплайн запускается через `mvn -B verify`, после него
+В CI явно задан Docker API `1.44`: версия `1.32`, используемая старым
+Testcontainers по умолчанию, не поддерживается Docker на текущем раннере.
+Этот же параметр использован при локальной проверке.
+
+Полный учебный пайплайн запускается через `mvn -B -Dapi.version=1.44 verify`, после него
 `python3 scripts/write_score.py` формирует баллы. Для ЛР1 нужны оба отчёта стиля,
-сумма замечаний не больше 15 и успешные эталонные тесты поведения. Настройки
+сумма замечаний не больше 15 и успешные эталонные тесты поведения. Состав и пороги
 проверок, эталонные тесты и начальная миграция не изменялись. Нормализация БД,
 характеризационные тесты калькулятора и задачи ЛР3–ЛР5 остаются следующим этапам.
