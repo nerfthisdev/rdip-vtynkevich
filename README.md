@@ -10,7 +10,6 @@ Java 21 + Spring Boot + Spring Data JPA (Hibernate) + PostgreSQL + Maven.
 
 - 📋 [Памятка студента](docs/STUDENT_GUIDE.md) — как начать, правила проверки, баллы
 - 📝 [Задания по лабораторным работам](docs/ASSIGNMENTS.md) — что делать в каждой ЛР и какой гейт это проверяет
-- 🔧 [Результат ЛР1](docs/LAB1.md) — найденные проблемы, рефакторинг и проверка
 - ✅ [Actions](../../actions) — статус проверки вашего решения и баллы по гейтам (артефакт `score`)
 
 ## Как запустить локально
@@ -32,6 +31,7 @@ mvn verify
 
 ```
 src/main/java/com/rbdip/bookstore/
+  customer/  — клиенты и переиспользование контактных данных
   product/   — товары
   order/     — заказы, позиции заказа, расчёт цены (OrderService, PricingCalculator)
   review/    — отзывы на товары

@@ -8,6 +8,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import com.rbdip.bookstore.customer.Customer;
+import com.rbdip.bookstore.customer.CustomerService;
 import com.rbdip.bookstore.product.Product;
 import com.rbdip.bookstore.product.ProductRepository;
 import java.math.BigDecimal;
@@ -38,6 +40,8 @@ class OrderServiceTest {
     private OrderItemRepository orderItemRepository;
     @Mock
     private OrderConfirmationNotifier notifier;
+    @Mock
+    private CustomerService customerService;
 
     private OrderService service;
 
@@ -45,7 +49,8 @@ class OrderServiceTest {
     void setUp() {
         service = new OrderService(
                 new OrderRequestValidator(), new OrderItemResolver(productRepository),
-                new PricingCalculator(), new OrderPersistence(orderRepository, orderItemRepository), notifier);
+                new PricingCalculator(), new OrderPersistence(orderRepository, orderItemRepository, customerService),
+                notifier);
     }
 
     @Test
@@ -73,6 +78,7 @@ class OrderServiceTest {
             assertThat(item.getOrderId()).isEqualTo(ORDER_ID);
             assertThat(item.getProductName()).isEqualTo("Refactoring");
             assertThat(item.getProductPrice()).isEqualByComparingTo(PRODUCT_PRICE);
+            assertThat(item.getProduct().getId()).isEqualTo(PRODUCT_ID);
         });
     }
 
@@ -85,7 +91,7 @@ class OrderServiceTest {
         assertThatThrownBy(() -> service.createOrder(request))
                 .isInstanceOf(IllegalArgumentException.class).hasMessage("quantity must be positive");
 
-        verifyNoInteractions(orderRepository, orderItemRepository, notifier);
+        verifyNoInteractions(customerService, orderRepository, orderItemRepository, notifier);
     }
 
     @Test
@@ -96,7 +102,7 @@ class OrderServiceTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("product " + MISSING_PRODUCT_ID + " not found");
 
-        verifyNoInteractions(orderRepository, orderItemRepository, notifier);
+        verifyNoInteractions(customerService, orderRepository, orderItemRepository, notifier);
     }
 
     @Test
@@ -115,11 +121,15 @@ class OrderServiceTest {
     }
 
     private void givenProduct() {
+        Product product = new Product("Refactoring", PRODUCT_PRICE, "Book");
+        ReflectionTestUtils.setField(product, "id", PRODUCT_ID);
         when(productRepository.findById(PRODUCT_ID))
-                .thenReturn(Optional.of(new Product("Refactoring", PRODUCT_PRICE, "Book")));
+                .thenReturn(Optional.of(product));
     }
 
     private void givenOrderCanBeSaved() {
+        when(customerService.findOrCreate("Ivan Petrov", "Moscow, Lenina 1", "+79990000000"))
+                .thenReturn(new Customer("Ivan Petrov", "Moscow, Lenina 1", "+79990000000"));
         when(orderRepository.save(any(Order.class))).thenAnswer(invocation -> {
             Order order = invocation.getArgument(0);
             ReflectionTestUtils.setField(order, "id", ORDER_ID);
